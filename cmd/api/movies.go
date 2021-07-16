@@ -8,7 +8,25 @@ import (
 )
 
 func (app *application) createMovieHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintln(w, "create a new movie")
+	// If the target destination for our .Decode() is struct, then its fields must be exported.
+	// key/value pairs in json are mapped to struct fields based on the struct tag names.
+	// if there is no matching tag, it decodes value into field that matches the key name.
+	// Other key/value pairs are ignored.
+	// If you omit key/value pair in json, the field will have its zero value
+	var input struct {
+		Title string	`json:"title"`
+		Year int32		`json:"year"`
+		Runtime int32	`json:"runtime"`
+		Genres []string	`json:"genres"`
+	}
+	// pass non-nil pointer to .Decode(v interface{})
+	err := app.readJSON(w, r, &input)
+	if err != nil {
+		app.badRequestResponse(w, r, err)
+		return
+	}
+
+	fmt.Fprintf(w, "%+v\n", input)
 }
 
 func (app *application) showMovieHandler(w http.ResponseWriter, r *http.Request) {
