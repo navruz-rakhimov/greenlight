@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"os"
 	"time"
+	"github.com/navruz-rakhimov/greenlight/internal/data"
 
 	_ "github.com/lib/pq"
 )
@@ -32,6 +33,7 @@ type config struct {
 type application struct {
 	config config
 	logger *log.Logger
+	models data.Models
 }
 
 func main() {
@@ -58,6 +60,7 @@ func main() {
 	app := &application{
 		config: cfg,
 		logger: logger,
+		models: data.NewModels(db),
 	}
 
 	srv := &http.Server{
@@ -87,7 +90,7 @@ func openDB(cfg config) (*sql.DB, error) {
 		return nil, err
 	}
 	db.SetConnMaxIdleTime(duration)
-	
+
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 	
